@@ -1,0 +1,268 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>HoloPrint+ | Minecraft Bedrock Structure to Pack</title>
+  <meta name="description" content="Convert .mcstructure files into fully functional Minecraft Bedrock .mcpack add-ons that place real blocks using Script API.">
+  <link rel="stylesheet" href="css/styles.css">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;600;700&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
+</head>
+<body>
+  <div class="bg-grid"></div>
+  <div class="bg-glow"></div>
+
+  <nav class="navbar">
+    <div class="nav-brand" onclick="showPage('home')">
+      <span class="logo-icon">⬡</span>
+      <span class="logo-text">HoloPrint<span class="plus">+</span></span>
+    </div>
+    <button class="nav-toggle" id="navToggle" aria-label="Menu">☰</button>
+    <ul class="nav-links" id="navLinks">
+      <li><a href="#" data-page="home" class="active">Home</a></li>
+      <li><a href="#" data-page="create">Create Pack</a></li>
+      <li><a href="#" data-page="structures">My Structures</a></li>
+      <li><a href="#" data-page="docs">Docs</a></li>
+      <li><a href="#" data-page="about">About</a></li>
+      <li><a href="#" data-page="contact">Contact</a></li>
+    </ul>
+  </nav>
+
+  <main id="app">
+    <!-- HOME -->
+    <section id="page-home" class="page active">
+      <div class="hero">
+        <div class="hero-content glass">
+          <h1>HoloPrint<span class="plus">+</span></h1>
+          <p class="tagline">Turn your .mcstructure builds into real Minecraft Bedrock add-ons.<br>Place actual blocks with one Armor Stand + Netherite Ingot.</p>
+          <div class="hero-btns">
+            <button class="btn btn-primary" onclick="showPage('create')">Create Pack</button>
+            <button class="btn btn-ghost" onclick="showPage('docs')">How it Works</button>
+          </div>
+          <div class="feature-pills">
+            <span>Script API</span>
+            <span>Real Blocks</span>
+            <span>Mobile Friendly</span>
+            <span>No Backend</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="section">
+        <h2 class="section-title">Why HoloPrint+?</h2>
+        <div class="cards-grid">
+          <div class="card glass">
+            <div class="card-icon">📦</div>
+            <h3>Real Structure Placement</h3>
+            <p>Not holograms. Actual blocks placed via official StructureManager API when you interact with an Armor Stand while holding a Netherite Ingot.</p>
+          </div>
+          <div class="card glass">
+            <div class="card-icon">📱</div>
+            <h3>Built for Android</h3>
+            <p>Fully responsive, touch-friendly UI that works great on phones, tablets and PCs. Generate packs right from your mobile browser.</p>
+          </div>
+          <div class="card glass">
+            <div class="card-icon">⚡</div>
+            <h3>Zero Backend</h3>
+            <p>Everything runs in your browser. Files never leave your device. Perfect for GitHub Pages deployment.</p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- CREATE PACK -->
+    <section id="page-create" class="page">
+      <div class="page-header">
+        <h1>Create Pack</h1>
+        <p>Upload structures → customize → download .mcpack</p>
+      </div>
+
+      <div class="create-layout">
+        <!-- Upload Zone -->
+        <div class="panel glass">
+          <h2>1. Upload Structures</h2>
+          <div class="drop-zone" id="dropZone">
+            <div class="drop-content">
+              <span class="drop-icon">📂</span>
+              <p>Drop .mcstructure files here</p>
+              <p class="hint">or click to browse (multiple allowed)</p>
+              <input type="file" id="fileInput" accept=".mcstructure" multiple hidden>
+            </div>
+          </div>
+          <div id="uploadProgress" class="progress-bar hidden">
+            <div class="progress-fill"></div>
+          </div>
+          <div id="fileList" class="file-list"></div>
+          <p id="uploadMsg" class="msg"></p>
+        </div>
+
+        <!-- Pack Settings -->
+        <div class="panel glass">
+          <h2>2. Pack Settings</h2>
+          <div class="form-grid">
+            <label>
+              Pack Name
+              <input type="text" id="packName" value="My Structure Pack" maxlength="64">
+            </label>
+            <label>
+              Description
+              <textarea id="packDesc" rows="2">Generated with HoloPrint+</textarea>
+            </label>
+            <label>
+              Structure to Place
+              <select id="structureSelect">
+                <option value="">-- Select structure --</option>
+              </select>
+            </label>
+            <label>
+              Structure Identifier (auto)
+              <input type="text" id="structId" readonly class="readonly">
+            </label>
+            <div class="coords">
+              <label>Offset X <input type="number" id="offsetX" value="0" step="1"></label>
+              <label>Offset Y <input type="number" id="offsetY" value="0" step="1"></label>
+              <label>Offset Z <input type="number" id="offsetZ" value="0" step="1"></label>
+            </div>
+            <label>
+              Rotation
+              <select id="rotation">
+                <option value="None">None (0°)</option>
+                <option value="Rotate90">90°</option>
+                <option value="Rotate180">180°</option>
+                <option value="Rotate270">270°</option>
+              </select>
+            </label>
+            <label>
+              Minecraft Version Target
+              <select id="mcVersion">
+                <option value="1.21.0">1.21+</option>
+                <option value="1.20.0">1.20+</option>
+              </select>
+            </label>
+            <label>
+              Pack Icon (optional PNG)
+              <input type="file" id="iconInput" accept="image/png,image/jpeg">
+            </label>
+          </div>
+        </div>
+
+        <!-- Preview & Generate -->
+        <div class="panel glass full-width">
+          <h2>3. Preview & Generate</h2>
+          <div id="packPreview" class="preview-box">
+            <p class="muted">Upload a structure and select it to see pack preview.</p>
+          </div>
+          <div class="action-row">
+            <button class="btn btn-primary" id="generateBtn" disabled>Generate .mcpack</button>
+            <button class="btn btn-ghost" id="clearBtn">Clear All</button>
+          </div>
+          <p id="genMsg" class="msg"></p>
+          <div id="downloadArea" class="download-area hidden"></div>
+        </div>
+      </div>
+    </section>
+
+    <!-- MY STRUCTURES -->
+    <section id="page-structures" class="page">
+      <div class="page-header">
+        <h1>My Structures</h1>
+        <p>Structures currently loaded in this session</p>
+      </div>
+      <div class="panel glass">
+        <div id="structuresTable" class="structures-table">
+          <p class="muted">No structures uploaded yet. Go to Create Pack to upload.</p>
+        </div>
+      </div>
+    </section>
+
+    <!-- DOCS -->
+    <section id="page-docs" class="page">
+      <div class="page-header">
+        <h1>Documentation</h1>
+        <p>How to use HoloPrint+ packs in Minecraft Bedrock</p>
+      </div>
+      <div class="docs-content">
+        <div class="panel glass">
+          <h2>How it Works</h2>
+          <ol class="steps">
+            <li>Export a .mcstructure using Structure Block in Creative (Windows recommended, or use world extract tools on mobile).</li>
+            <li>Upload the file(s) here, set name, offsets, rotation.</li>
+            <li>Download the generated .mcpack and import it into Minecraft.</li>
+            <li>Create/open a world, enable the Behavior Pack + <strong>Beta APIs</strong> experiment.</li>
+            <li>In Creative, place an <strong>Armor Stand</strong>.</li>
+            <li>Hold a <strong>Netherite Ingot</strong> and interact (right-click / long-press) the Armor Stand.</li>
+            <li>The structure places as real blocks at the Armor Stand position + your offsets & rotation.</li>
+          </ol>
+        </div>
+        <div class="panel glass">
+          <h2>Requirements</h2>
+          <ul>
+            <li>Minecraft Bedrock 1.21+ recommended (Script API StructureManager)</li>
+            <li>Beta APIs experiment must be enabled in the world</li>
+            <li>Creative mode recommended for testing (works in Survival too if you have the items)</li>
+          </ul>
+        </div>
+        <div class="panel glass">
+          <h2>Useful Commands</h2>
+          <div class="code-block">
+            <code id="cmdGive">/give @s structure_block</code>
+            <button class="copy-btn" data-copy="cmdGive">Copy</button>
+          </div>
+          <div class="code-block">
+            <code id="cmdIngot">/give @s netherite_ingot</code>
+            <button class="copy-btn" data-copy="cmdIngot">Copy</button>
+          </div>
+          <div class="code-block">
+            <code id="cmdStand">/summon armor_stand ~ ~ ~</code>
+            <button class="copy-btn" data-copy="cmdStand">Copy</button>
+          </div>
+        </div>
+        <div class="panel glass">
+          <h2>Limitations</h2>
+          <ul>
+            <li>Structure size is limited by Minecraft (typically ~64 blocks in any direction for reliable placement).</li>
+            <li>Android Structure Block Export button is hidden in recent versions — save to world then extract .mcstructure using external tools or PC.</li>
+            <li>Requires Beta APIs experiment (disables achievements in that world).</li>
+            <li>Only places the structure selected in the pack generator. Multiple structures can be included but one primary is used for the Armor Stand trigger.</li>
+          </ul>
+        </div>
+      </div>
+    </section>
+
+    <!-- ABOUT -->
+    <section id="page-about" class="page">
+      <div class="page-header">
+        <h1>About HoloPrint+</h1>
+      </div>
+      <div class="panel glass">
+        <p>HoloPrint+ is inspired by the original <a href="https://holoprint-mc.github.io" target="_blank" rel="noopener">HoloPrint</a> project (which creates hologram resource packs).</p>
+        <p>This version focuses on <strong>actual block placement</strong> using the official Minecraft Bedrock Script API (<code>world.structureManager.place</code>).</p>
+        <p>Built as a pure client-side web app — HTML, CSS, JavaScript + JSZip. No servers, no accounts, no tracking of your files.</p>
+        <p>Perfect for creators who want to share builds that players can spawn with one simple interaction.</p>
+      </div>
+    </section>
+
+    <!-- CONTACT -->
+    <section id="page-contact" class="page">
+      <div class="page-header">
+        <h1>Contact</h1>
+      </div>
+      <div class="panel glass">
+        <p>This is an open project. Issues, ideas or contributions welcome.</p>
+        <p>Deploy your own copy on GitHub Pages and customize it however you like.</p>
+        <p class="muted">Made for the Bedrock community. Stay creative.</p>
+      </div>
+    </section>
+  </main>
+
+  <footer class="footer">
+    <p>HoloPrint+ · Client-side only · Inspired by HoloPrint</p>
+  </footer>
+
+  <script src="js/structures.js"></script>
+  <script src="js/pack-generator.js"></script>
+  <script src="js/app.js"></script>
+</body>
+</html>
